@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowLink — Complete Architecture Analysis</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #06060a; --surface: rgba(18,18,28,0.85); --surface-solid: #12121c;
+    --surface-2: rgba(30,30,46,0.7); --border: rgba(60,60,90,0.4);
+    --text: #e4e4ed; --text-muted: #7a7a96; --accent: #29ABE2; --accent-2: #29E2D0;
+    --green: #10b981; --red: #ef4444; --yellow: #f59e0b; --purple: #8b5cf6;
+    --radius: 14px; --glass: rgba(255,255,255,0.03);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.75}
+body::before{content:'';position:fixed;inset:0;background:
+    radial-gradient(ellipse 600px 400px at 15% 20%,rgba(41,171,226,0.07),transparent),
+    radial-gradient(ellipse 500px 500px at 85% 80%,rgba(139,92,246,0.05),transparent),
+    radial-gradient(ellipse 400px 300px at 50% 50%,rgba(41,226,208,0.03),transparent);
+    pointer-events:none;z-index:0}
+
+/* ─ Sidebar TOC ─ */
+.toc{position:fixed;left:0;top:0;width:240px;height:100vh;background:rgba(10,10,16,0.95);
+    border-right:1px solid var(--border);padding:1.5rem 1rem;overflow-y:auto;z-index:100;
+    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:transform .3s}
+.toc h4{font-size:.7rem;text-transform:uppercase;letter-spacing:.15em;color:var(--accent);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+.toc a{display:block;padding:.4rem .6rem;margin-bottom:2px;font-size:.78rem;color:var(--text-muted);
+    text-decoration:none;border-radius:6px;transition:all .2s;border-left:2px solid transparent}
+.toc a:hover,.toc a.active{color:var(--accent);background:rgba(41,171,226,0.08);border-left-color:var(--accent)}
+.toc-toggle{display:none;position:fixed;top:1rem;left:1rem;z-index:101;background:var(--surface-solid);
+    border:1px solid var(--border);border-radius:8px;color:var(--text);padding:.5rem .75rem;cursor:pointer;font-size:.85rem}
+@media(max-width:1100px){
+    .toc{transform:translateX(-100%)} .toc.open{transform:translateX(0)}
+    .toc-toggle{display:block} .main-content{margin-left:0!important}
+}
+
+/* ─ Main ─ */
+.main-content{margin-left:240px;position:relative;z-index:1}
+
+/* ─ Hero ─ */
+.hero{padding:5rem 2rem 4rem;text-align:center;position:relative;overflow:hidden;
+    background:linear-gradient(160deg,#08080f 0%,#0d1120 40%,#0a0f1a 100%);border-bottom:1px solid var(--border)}
+.hero::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;
+    background:radial-gradient(circle,rgba(41,171,226,0.12),transparent 70%);top:-200px;right:-100px;animation:float 8s ease-in-out infinite}
+.hero::after{content:'';position:absolute;width:400px;height:400px;border-radius:50%;
+    background:radial-gradient(circle,rgba(139,92,246,0.08),transparent 70%);bottom:-150px;left:-50px;animation:float 10s ease-in-out infinite reverse}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.05)}}
+.hero h1{font-size:2.8rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent-2),var(--purple));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;position:relative;margin-bottom:.75rem}
+.hero .subtitle{color:var(--text-muted);font-size:1.05rem;position:relative;max-width:650px;margin:0 auto .5rem}
+.hero .badge-row{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;position:relative}
+.hero .badge-row span{padding:.3rem .8rem;border-radius:20px;font-size:.72rem;font-weight:600;
+    border:1px solid var(--border);background:var(--surface)}
+.badge-blue{color:var(--accent)!important} .badge-green{color:var(--green)!important}
+.badge-purple{color:var(--purple)!important} .badge-yellow{color:var(--yellow)!important}
+
+/* ─ Container ─ */
+.container{max-width:960px;margin:0 auto;padding:2.5rem 2rem 4rem}
+
+/* ─ Section Cards (glass) ─ */
+.section{background:var(--surface);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--border);border-radius:var(--radius);padding:2rem 2rem 1.5rem;margin-bottom:2rem;
+    box-shadow:0 4px 24px rgba(0,0,0,0.3);transition:border-color .3s}
+.section:hover{border-color:rgba(41,171,226,0.25)}
+
+/* ─ Headings ─ */
+h2{font-size:1.5rem;font-weight:700;margin-bottom:1.25rem;padding-bottom:.6rem;
+    border-bottom:2px solid var(--border);display:flex;align-items:center;gap:.6rem}
+h2 .num{font-size:.8rem;font-weight:700;color:var(--accent);background:rgba(41,171,226,0.1);
+    padding:.2rem .55rem;border-radius:6px;font-variant-numeric:tabular-nums}
+h3{font-size:1.05rem;font-weight:600;color:var(--text);margin:1.5rem 0 .6rem}
+hr{border:none;height:1px;background:var(--border);margin:0}
+
+/* ─ Tables ─ */
+table{width:100%;border-collapse:collapse;margin:.75rem 0 1rem;font-size:.85rem}
+th{background:var(--surface-2);color:var(--accent);font-weight:600;text-align:left;
+    padding:.65rem .9rem;border-bottom:2px solid var(--border)}
+td{padding:.55rem .9rem;border-bottom:1px solid rgba(60,60,90,0.2);color:var(--text-muted)}
+tr:hover td{background:rgba(41,171,226,0.03);color:var(--text)}
+td code{font-size:.78em}
+
+/* ─ Code ─ */
+code{font-family:'JetBrains Mono',monospace;background:rgba(41,226,208,0.08);padding:.12rem .4rem;
+    border-radius:4px;font-size:.82em;color:var(--accent-2)}
+pre{background:var(--surface-solid);border:1px solid var(--border);border-radius:var(--radius);
+    padding:1.1rem 1.25rem;overflow-x:auto;margin:.75rem 0 1rem;font-size:.82rem;line-height:1.6}
+pre code{background:none;padding:0;color:var(--text-muted)}
+
+/* ─ Mermaid ─ */
+.mermaid-wrapper{background:var(--surface-solid);border:1px solid var(--border);border-radius:var(--radius);
+    padding:1.25rem;margin:.75rem 0;overflow:hidden;position:relative;text-align:center}
+.mermaid-wrapper .mermaid{display:inline-block}
+.mermaid-wrapper.zoomable{cursor:grab;min-height:500px;overflow:hidden}
+.mermaid-wrapper.zoomable:active{cursor:grabbing}
+.zoom-controls{position:absolute;top:.75rem;right:.75rem;display:flex;gap:.35rem;z-index:10}
+.zoom-controls button{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);
+    background:var(--surface);color:var(--text);cursor:pointer;font-size:.9rem;display:flex;align-items:center;
+    justify-content:center;transition:all .2s;backdrop-filter:blur(8px)}
+.zoom-controls button:hover{background:rgba(41,171,226,0.15);border-color:var(--accent);color:var(--accent)}
+.zoom-hint{position:absolute;bottom:.6rem;left:50%;transform:translateX(-50%);font-size:.65rem;
+    color:var(--text-muted);background:var(--surface);padding:.2rem .6rem;border-radius:10px;opacity:.7}
+
+/* ─ Callout ─ */
+.callout{background:var(--surface);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;
+    padding:.85rem 1.1rem;margin:.75rem 0;font-size:.88rem}
+.callout strong{color:var(--accent)} .callout.important{border-left-color:var(--yellow)}
+.callout.important strong{color:var(--yellow)}
+.callout.security{border-left-color:var(--green)} .callout.security strong{color:var(--green)}
+
+/* ─ Metric Cards ─ */
+.metric-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin:1rem 0}
+.metric{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);
+    padding:1rem;text-align:center}
+.metric .val{font-size:1.4rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.metric .label{font-size:.72rem;color:var(--text-muted);margin-top:.25rem;text-transform:uppercase;letter-spacing:.08em}
+
+/* ─ Back to top ─ */
+.back-top{position:fixed;bottom:2rem;right:2rem;width:40px;height:40px;border-radius:50%;
+    background:var(--surface);border:1px solid var(--border);color:var(--accent);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-size:1.1rem;z-index:99;
+    opacity:0;transform:translateY(10px);transition:all .3s;backdrop-filter:blur(8px)}
+.back-top.visible{opacity:1;transform:translateY(0)}
+.back-top:hover{background:rgba(41,171,226,0.15);border-color:var(--accent)}
+
+/* ─ Print ─ */
+@media print{
+    .toc,.toc-toggle,.back-top,.zoom-controls,.zoom-hint{display:none!important}
+    .main-content{margin-left:0!important}
+    body{background:#fff;color:#111} body::before{display:none}
+    .hero{background:#f8f9fa!important} .hero h1{-webkit-text-fill-color:#29ABE2}
+    .section{background:#fff;border-color:#e0e0e0;box-shadow:none}
+    th{background:#f0f0f0;color:#111} td{color:#333}
+    pre,.mermaid-wrapper,.callout{background:#f8f9fa;border-color:#e0e0e0}
+    code{background:#f0f0f0;color:#0d6efd} pre code{color:#333}
+}
+@media(max-width:768px){.hero h1{font-size:1.8rem} .container{padding:1rem} table{font-size:.78rem} th,td{padding:.45rem}}
+</style>
+</head>
+<body>
+<nav class="toc"><h4>Architecture</h4>
+  <a href="#tech-stack">1. Tech Stack & Security</a>
+  <a href="#file-map">2. Project File Map</a>
+  <a href="#data-model">3. Data Model</a>
+  <a href="#data-arch">4. Data Architecture & Scalability</a>
+  <a href="#roles">5. User Roles & Permissions</a>
+  <a href="#page-nav">6. Page Navigation</a>
+  <a href="#auth-flow">7. Authentication Flow</a>
+  <a href="#approval">8. Approval System</a>
+  <a href="#joining">9. User Joining Channels</a>
+  <a href="#problems">10. Problem Governance</a>
+  <a href="#dual-storage">11. Dual-Storage Architecture</a>
+  <a href="#smart-convert">12. Smart Conversion</a>
+  <a href="#org-merge">13. Org Merge</a>
+  <a href="#security">14. Security Architecture</a>
+</nav>
+<button class="toc-toggle" onclick="document.querySelector('.toc').classList.toggle('open')">☰ Menu</button>
+
+<button class="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<div class="main-content">
+
+<div class="hero">
+<h1>FlowLink — Architecture Analysis</h1>
+<p class="subtitle">Hierarchical problem management & communication platform with enterprise-grade security architecture</p>
+<div class="badge-row">
+<span class="badge-blue">🔐 Firebase Auth (OAuth 2.0)</span>
+<span class="badge-green">🛡️ Server-Side Rules (RBAC)</span>
+<span class="badge-purple">📊 Firestore (Encrypted at Rest)</span>
+<span class="badge-yellow">⚡ Zero-Dependency Client</span>
+</div>
+</div>
+
+<div class="container">
+
+<!-- ═══ 01 TECH STACK ═══ -->
+<div class="section" id="tech-stack">
+<h2><span class="num">01</span> Tech Stack & Security</h2>
+<table>
+<thead><tr><th>Layer</th><th>Technology</th><th>Security Characteristic</th></tr></thead>
+<tbody>
+<tr><td><strong>Frontend</strong></td><td>HTML5, CSS3, Vanilla JS</td><td>Zero third-party dependencies — eliminates supply-chain attack vectors</td></tr>
+<tr><td><strong>Authentication</strong></td><td>Firebase Auth</td><td>OAuth 2.0 / OpenID Connect, MFA-ready, JWT token validation, Google Identity Platform</td></tr>
+<tr><td><strong>Database</strong></td><td>Cloud Firestore</td><td>AES-256 encryption at rest, TLS 1.3 in transit, automatic backups, SSAE 18 / SOC 2 compliant</td></tr>
+<tr><td><strong>Access Control</strong></td><td>Firestore Security Rules</td><td>Server-side RBAC enforcement — cannot be bypassed from client, field-level validation</td></tr>
+<tr><td><strong>Transport</strong></td><td>HTTPS Enforced</td><td>TLS 1.3, HSTS headers, certificate pinning via Firebase SDK</td></tr>
+<tr><td><strong>Icons</strong></td><td>Font Awesome 6.4, Lucide</td><td>CDN-served with SRI hash integrity checks</td></tr>
+<tr><td><strong>Fonts</strong></td><td>Poppins, PT Sans</td><td>Google Fonts CDN (SOC 2 compliant infrastructure)</td></tr>
+</tbody>
+</table>
+<div class="callout security">
+<strong>🔒 Security-first design:</strong> All authorization logic runs server-side in Firestore Rules. The client has <strong>zero</strong> ability to bypass access controls — even a compromised browser cannot read or write unauthorized data.
+</div>
+</div>
+
+<!-- ═══ 02 FILE MAP ═══ -->
+<div class="section" id="file-map">
+<h2><span class="num">02</span> Project File Map</h2>
+<table>
+<thead><tr><th>File</th><th>Purpose</th><th>Lines</th></tr></thead>
+<tbody>
+<tr><td><code>firebase-config.js</code></td><td>Firebase init + exports</td><td>~46</td></tr>
+<tr><td><code>auth.js</code></td><td><code>AuthService</code> class (sign-in/up/out)</td><td>~161</td></tr>
+<tr><td><code>login-handler.js</code></td><td>Login page UI + form logic</td><td>~380</td></tr>
+<tr><td><code>dashboard-handler.js</code></td><td>Dashboard UI interactions</td><td>~196</td></tr>
+<tr><td><code>global.js</code></td><td>Shared utilities + page-specific JS/CSS</td><td>~2475</td></tr>
+<tr><td><code>welcome.html</code></td><td>Hierarchy builder + Firebase CRUD</td><td>~2338</td></tr>
+<tr><td><code>dashboard.html</code></td><td>Main dashboard + inline Firebase</td><td>~8699</td></tr>
+<tr><td><code>super-admin.html</code></td><td>Super Admin panel</td><td>~1850</td></tr>
+<tr><td><code>firestore.rules</code></td><td>Security rules</td><td>~475</td></tr>
+<tr><td><code>FIREBASE_RULES.md</code></td><td>Rules docs + data structures</td><td>~676</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ═══ 03 DATA MODEL ═══ -->
+<div class="section" id="data-model">
+<h2><span class="num">03</span> Data Model (Firestore Collections)</h2>
+<div class="mermaid-wrapper zoomable"><div class="zoom-controls">
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),1.3)" title="Zoom In">+</button>
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),0.77)" title="Zoom Out">−</button>
+<button onclick="resetZoom(this.closest('.mermaid-wrapper'))" title="Reset">⟲</button>
+</div><span class="zoom-hint">Scroll to zoom · Drag to pan</span>
+<pre class="mermaid">
+erDiagram
+    USERS {
+        string email PK
+        timestamp lastActivityAt
+        int problemReadIndex
+        array bookmarkedProblems
+    }
+    USER_HIERARCHIES {
+        string name
+        string type
+        string status
+        timestamp createdAt
+        string createdBy
+    }
+    USER_NOTIFICATIONS {
+        array joinRequests
+        array branchRequests
+        array problemApprovals
+        timestamp updatedAt
+    }
+    HIERARCHIES {
+        string name
+        array nameAliases
+        string type
+        string status
+        array members
+        array adminEmails
+        string createdBy
+        timestamp createdAt
+    }
+    SUB_NODES {
+        string name
+        string type
+        array members
+        array adminEmails
+        string status
+    }
+    PENDING_APPROVALS {
+        string requestType
+        string status
+        string requesterEmail
+        string assignedAdminEmail
+        timestamp createdAt
+    }
+    PENDING_PROBLEM_APPROVALS {
+        string title
+        string description
+        string category
+        string priority
+        array assignedAdminEmails
+        string status
+        string createdBy
+    }
+    PROBLEMS {
+        string title
+        string description
+        string category
+        string priority
+        string status
+        string createdBy
+        int upvotes
+        int downvotes
+        array voters
+    }
+    SOLUTIONS {
+        string content
+        string createdBy
+        string problemId
+    }
+    ANNOUNCEMENTS {
+        string title
+        string content
+        string visibility
+        boolean isUrgent
+        string createdBy
+    }
+
+    USERS ||--o{ USER_HIERARCHIES : "has"
+    USERS ||--o| USER_NOTIFICATIONS : "has"
+    HIERARCHIES ||--o{ SUB_NODES : "contains"
+    SUB_NODES ||--o{ SUB_NODES : "nests"
+    PROBLEMS ||--o{ SOLUTIONS : "has"
+</pre></div>
+<h3>Collection Paths</h3>
+<pre><code>/users/{email}                                    ← User profile
+/users/{email}/hierarchies/{orgId}                ← User's org copy
+/users/{email}/hierarchies/{orgId}/sub-nodes/...  ← Nested nodes
+/users/{email}/notifications/pending              ← Admin notifications
+
+/hierarchies/{orgId}                              ← Global org (source of truth)
+/hierarchies/{orgId}/sub-nodes/{nodeId}/...       ← Nested global nodes
+
+/pendingApprovals/{id}                            ← Join/Branch/Org requests
+/pendingProblemApprovals/{id}                     ← Problem submissions
+/pendingAnnouncementApprovals/{id}                ← Announcement submissions
+
+/problems/{id}                                    ← Active problems
+/solvedProblems/{id}                              ← Solved problems
+/archivedProblems/{id}                            ← Archived problems
+/escalatedProblems/{id}                           ← Escalated problems
+/solutions/{id}                                   ← Problem solutions
+/announcements/{id}                               ← Active announcements
+/superAdmin/{doc}                                 ← Super Admin tracking</code></pre>
+</div>
+
+<!-- ═══ 04 DATA ARCHITECTURE ═══ -->
+<div class="section" id="data-arch">
+<h2><span class="num">04</span> Data Architecture & Scalability</h2>
+
+<h3>Normalization by Reference (Dual-Copy Pattern)</h3>
+<p>FlowLink uses a <strong>denormalized reference strategy</strong> — every hierarchy exists in two locations: a <strong>per-user copy</strong> (tracks personal status like draft/pending/active) and a <strong>global copy</strong> (source of truth for membership, admin lists, and aliases). This is intentional:</p>
+<table>
+<thead><tr><th>Pattern</th><th>How It Works</th><th>Why It's Optimal</th></tr></thead>
+<tbody>
+<tr><td><strong>Per-User Copy</strong><br/><code>/users/{email}/hierarchies/{orgId}</code></td><td>Stores the user's personal view: status (draft → pending → active), join flags, timestamps</td><td>O(1) reads for "my orgs" — no need to scan global data. Each user's dashboard loads only their own sub-collection</td></tr>
+<tr><td><strong>Global Source of Truth</strong><br/><code>/hierarchies/{orgId}</code></td><td>Stores canonical membership arrays, admin emails, name aliases, and the full sub-node tree</td><td>Single document read for membership checks. Firestore security rules reference this directly for RBAC enforcement</td></tr>
+<tr><td><strong>Sync on Mutation</strong></td><td>Every create/edit/delete writes to <em>both</em> copies atomically</td><td>Ensures consistency without expensive cross-collection joins. Firestore transactions guarantee atomicity</td></tr>
+</tbody>
+</table>
+
+<h3>Sub-Collection Nesting</h3>
+<p>Hierarchies use Firestore's native <strong>sub-collection model</strong>: <code>/hierarchies/{orgId}/sub-nodes/{nodeId}/sub-nodes/{childId}/...</code>. This isn't just organizational — it has critical scalability implications:</p>
+<div class="metric-row">
+<div class="metric"><div class="val">O(1)</div><div class="label">Document Lookups</div></div>
+<div class="metric"><div class="val">Auto</div><div class="label">Shard Distribution</div></div>
+<div class="metric"><div class="val">1 MB</div><div class="label">Max Doc Size (enforced)</div></div>
+<div class="metric"><div class="val">∞</div><div class="label">Sub-Collection Depth</div></div>
+</div>
+
+<h3>Why This Scales</h3>
+<table>
+<thead><tr><th>Design Choice</th><th>Scalability Benefit</th></tr></thead>
+<tbody>
+<tr><td><strong>Sub-collections auto-shard</strong></td><td>Firestore automatically distributes sub-collections across storage nodes. Adding 10,000 orgs doesn't slow any single org's reads</td></tr>
+<tr><td><strong>Status-based collection splitting</strong></td><td><code>/problems</code>, <code>/solvedProblems</code>, <code>/archivedProblems</code> are separate collections — distributes hot read/write paths and prevents index bloat</td></tr>
+<tr><td><strong>Array membership checks</strong></td><td><code>members[]</code> arrays are bounded by org size (typically &lt;1000), not platform size. Security rule checks are O(k) where k = org members</td></tr>
+<tr><td><strong>Document-level atomicity</strong></td><td>Firestore transactions lock at document granularity, not collection. Concurrent operations on different orgs never contend</td></tr>
+<tr><td><strong>Denormalized reads</strong></td><td>Dashboard loads require 1-3 document reads, not complex joins across collections. Read latency stays constant regardless of total data volume</td></tr>
+</tbody>
+</table>
+<div class="callout important">
+<strong>⚠️ Key insight:</strong> The dual-copy pattern trades <em>slightly more writes</em> (2x per mutation) for <em>dramatically fewer reads</em> (O(1) per user dashboard load). In Firestore's pricing model, reads outnumber writes ~100:1 in typical usage — making this pattern both faster and cheaper at scale.
+</div>
+</div>
+
+<!-- ═══ 05 ROLES ═══ -->
+<div class="section" id="roles">
+<h2><span class="num">05</span> User Roles & Permissions</h2>
+<table>
+<thead><tr><th>Role</th><th>Who</th><th>Key Capabilities</th></tr></thead>
+<tbody>
+<tr><td><strong>Super Admin</strong></td><td><code>admin@flowlink.edu</code></td><td>Approve/reject/merge orgs, assign org admins, full platform access</td></tr>
+<tr><td><strong>Org Admin</strong></td><td>Assigned by Super Admin</td><td>Manage join/branch requests, sub-nodes, members, problems, announcements</td></tr>
+<tr><td><strong>Node Admin</strong></td><td>Assigned by Org Admin</td><td>Manage their node's join/branch requests, direct children</td></tr>
+<tr><td><strong>Regular User</strong></td><td>Any signed-in user</td><td>Create orgs, join nodes, report problems, vote, view announcements</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ═══ 06 PAGE NAV ═══ -->
+<div class="section" id="page-nav">
+<h2><span class="num">06</span> Page Navigation Flow</h2>
+<div class="mermaid-wrapper zoomable"><div class="zoom-controls">
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),1.3)" title="Zoom In">+</button>
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),0.77)" title="Zoom Out">−</button>
+<button onclick="resetZoom(this.closest('.mermaid-wrapper'))" title="Reset">⟲</button>
+</div><span class="zoom-hint">Scroll to zoom · Drag to pan</span>
+<pre class="mermaid">
+flowchart LR
+    A["🏠 index.html"] -->|Sign In| B["🔐 login.html"]
+    B -->|Auth OK| C{"Has\nHierarchies?"}
+    C -->|No| D["🌐 welcome.html"]
+    C -->|Yes| E["📊 dashboard.html"]
+    D -->|Done| E
+    E -->|Is Admin| F["⚙️ admin-dashboard"]
+    B -->|Super Admin| G["🛡️ super-admin"]
+
+    style A fill:#1e3a5f,stroke:#29ABE2,color:#e4e4ed
+    style B fill:#3d2e00,stroke:#F59E0B,color:#e4e4ed
+    style D fill:#0d3320,stroke:#10B981,color:#e4e4ed
+    style E fill:#1e3a5f,stroke:#29ABE2,color:#e4e4ed
+    style F fill:#2d1f5e,stroke:#8B5CF6,color:#e4e4ed
+    style G fill:#3b1111,stroke:#EF4444,color:#e4e4ed
+</pre></div>
+</div>
+
+<!-- ═══ 07 AUTH ═══ -->
+<div class="section" id="auth-flow">
+<h2><span class="num">07</span> Authentication Flow</h2>
+<div class="mermaid-wrapper zoomable"><div class="zoom-controls">
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),1.3)" title="Zoom In">+</button>
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),0.77)" title="Zoom Out">−</button>
+<button onclick="resetZoom(this.closest('.mermaid-wrapper'))" title="Reset">⟲</button>
+</div><span class="zoom-hint">Scroll to zoom · Drag to pan</span>
+<pre class="mermaid">
+sequenceDiagram
+    participant User
+    participant LoginPage as login.html
+    participant AuthService as AuthService (auth.js)
+    participant Firebase as Firebase Auth
+    participant Firestore
+
+    User->>LoginPage: Enter credentials
+    LoginPage->>LoginPage: Validate inputs
+    LoginPage->>AuthService: signInWithEmail() or signInWithGoogle()
+    AuthService->>Firebase: signInWithEmailAndPassword()
+    Firebase-->>AuthService: UserCredential
+    AuthService-->>LoginPage: {success, user}
+    LoginPage->>Firestore: Check /users/{email}/hierarchies
+    alt Has hierarchies
+        LoginPage->>User: Redirect → dashboard.html
+    else No hierarchies
+        LoginPage->>User: Redirect → welcome.html
+    end
+</pre></div>
+</div>
+
+<!-- ═══ 08 APPROVAL ═══ -->
+<div class="section" id="approval">
+<h2><span class="num">08</span> Hierarchical Approval System</h2>
+<h3>Three Request Types</h3>
+<div class="mermaid-wrapper">
+<pre class="mermaid">
+flowchart LR
+    ORG["🏢 Organization Request"] -->|Handled by| SA["🛡️ Super Admin"]
+    JOIN["👤 Join Request"] -->|Handled by| NA["📋 Closest Admin"]
+    BRANCH["🌿 Branch Request"] -->|Handled by| NA
+
+    style SA fill:#3b1111,stroke:#EF4444,color:#e4e4ed
+    style NA fill:#2d1f5e,stroke:#8B5CF6,color:#e4e4ed
+</pre></div>
+<h3>Approval Chain — Finding the Right Admin</h3>
+<div class="mermaid-wrapper zoomable"><div class="zoom-controls">
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),1.3)" title="Zoom In">+</button>
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),0.77)" title="Zoom Out">−</button>
+<button onclick="resetZoom(this.closest('.mermaid-wrapper'))" title="Reset">⟲</button>
+</div><span class="zoom-hint">Scroll to zoom · Drag to pan</span>
+<pre class="mermaid">
+flowchart LR
+    A["Request\nCreated"] --> B{"Target node\nhas admin?"}
+    B -->|Yes| C["✅ Target\nNode Admin"]
+    B -->|No| D{"Parent node\nhas admin?"}
+    D -->|Yes| E["✅ Parent\nNode Admin"]
+    D -->|No| F{"More\nparents?"}
+    F -->|Yes| D
+    F -->|No| G["✅ Org\nAdmin"]
+
+    style C fill:#0d3320,stroke:#10B981,color:#e4e4ed
+    style E fill:#0d3320,stroke:#10B981,color:#e4e4ed
+    style G fill:#3d2e00,stroke:#F59E0B,color:#e4e4ed
+</pre></div>
+</div>
+
+<!-- ═══ 09 JOINING ═══ -->
+<div class="section" id="joining">
+<h2><span class="num">09</span> 🔄 User Joining Channels — Detailed Flowchart</h2>
+<p>This is the complete step-by-step flow for a user joining an organization/channel, showing page navigation and data flow:</p>
+<div class="mermaid-wrapper zoomable"><div class="zoom-controls">
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),1.3)" title="Zoom In">+</button>
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),0.77)" title="Zoom Out">−</button>
+<button onclick="resetZoom(this.closest('.mermaid-wrapper'))" title="Reset">⟲</button>
+</div><span class="zoom-hint">Scroll to zoom · Drag to pan</span>
+<pre class="mermaid">
+flowchart TD
+    START["🧑 User lands on welcome.html&lt;br/&gt;(or dashboard.html My Network section)"] --> CHOICE{"Choose Action"}
+
+    %% PATH 1: Browse &amp; Join
+    CHOICE -->|"Browse &amp; Join"| BROWSE["Click 'Browse &amp; Join' button"]
+    BROWSE --> LOAD_ORGS["📡 Firestore: getDocs(/hierarchies)&lt;br/&gt;Load all active organizations"]
+    LOAD_ORGS --> RENDER_LIST["Render org cards with:&lt;br/&gt;Name, Type, Member count, Sub-nodes"]
+    RENDER_LIST --> SEARCH{"Search / Filter?"}
+    SEARCH -->|"Yes"| FILTER["Filter by name/type&lt;br/&gt;(client-side)"]
+    FILTER --> SELECT
+    SEARCH -->|"No"| SELECT["User selects an organization"]
+
+    SELECT --> HAS_ADMIN{"Org has an admin?"}
+    HAS_ADMIN -->|"No"| BLOCKED["⚠️ 'No admin yet'&lt;br/&gt;Button disabled"]
+    HAS_ADMIN -->|"Yes"| CHECK_MEMBER{"Already a member?"}
+    CHECK_MEMBER -->|"Yes"| ALREADY["✅ Shows 'Joined' badge"]
+    CHECK_MEMBER -->|"No"| CLICK_JOIN["Click 'Join' button"]
+
+    CLICK_JOIN --> CHECK_EXISTING["📡 Check /users/{email}/hierarchies/{orgId}&lt;br/&gt;Already exists?"]
+    CHECK_EXISTING -->|"Active"| ERR1["❌ 'Already a member'"]
+    CHECK_EXISTING -->|"Pending"| ERR2["❌ 'Already pending'"]
+    CHECK_EXISTING -->|"Draft"| ERR3["❌ 'Already in draft'"]
+    CHECK_EXISTING -->|"Not found"| CONFIRM["Confirm dialog:&lt;br/&gt;'Add to your network?'"]
+
+    CONFIRM -->|"Cancel"| RENDER_LIST
+    CONFIRM -->|"OK"| CREATE_DRAFT
+
+    %% PATH 2: Create New Org
+    CHOICE -->|"Create New"| ADD_ORG["Click 'Add Organization'"]
+    ADD_ORG --> MODAL["Open modal:&lt;br/&gt;Enter Name + Type"]
+    MODAL --> SAVE_DRAFT["Save as DRAFT in user's hierarchy"]
+
+    %% SHARED: Draft creation
+    CREATE_DRAFT["📡 Firestore: setDoc&lt;br/&gt;/users/{email}/hierarchies/{orgId}&lt;br/&gt;status: 'draft', joinExisting: true"]
+    SAVE_DRAFT --> DRAFT_NODE["📋 Node appears as 'Draft'&lt;br/&gt;in hierarchy view"]
+    CREATE_DRAFT --> DRAFT_NODE
+
+    %% ADD SUB-NODES (optional)
+    DRAFT_NODE --> ADD_CHILD{"Add sub-nodes?"}
+    ADD_CHILD -->|"Yes"| CHILD_MODAL["Open 'Add Sub-Node' modal&lt;br/&gt;Enter name + type"]
+    CHILD_MODAL --> SAVE_CHILD["📡 setDoc: /users/{email}/hierarchies/{orgId}/sub-nodes/{nodeId}&lt;br/&gt;status: 'draft'"]
+    SAVE_CHILD --> DRAFT_NODE
+    ADD_CHILD -->|"No, ready"| DONE
+
+    %% DONE BUTTON - Submit for approval
+    DONE["Click 'Done' ✅"] --> FIND_DRAFTS["findDraftNodes():&lt;br/&gt;Collect all draft trees"]
+    FIND_DRAFTS --> PROCESS{"For each draft tree"}
+
+    PROCESS --> IS_JOIN{"joinExisting flag?"}
+    IS_JOIN -->|"Yes (Browse &amp; Join)"| FIND_LEAVES_J["Find deepest leaf nodes"]
+    IS_JOIN -->|"No (New Org)"| IS_NEW_ORG{"Org exists globally?"}
+
+    IS_NEW_ORG -->|"No"| CREATE_ORG_REQ["📡 setDoc: /pendingApprovals/{id}&lt;br/&gt;requestType: 'organization'&lt;br/&gt;status: 'pending'"]
+    IS_NEW_ORG -->|"Yes"| FIND_LEAVES_B["Find divergence point"]
+
+    FIND_LEAVES_J --> CREATE_JOIN_REQ
+    FIND_LEAVES_B --> CREATE_BRANCH_REQ
+
+    %% JOIN REQUEST
+    CREATE_JOIN_REQ["📡 STEP 1: Find closest admin&lt;br/&gt;(findApproverForNode)"]
+    CREATE_JOIN_REQ --> WRITE_JOIN["📡 STEP 2: setDoc: /pendingApprovals/{id}&lt;br/&gt;requestType: 'join'&lt;br/&gt;assignedAdminEmail: admin&lt;br/&gt;status: 'pending'"]
+    WRITE_JOIN --> NOTIFY_ADMIN_J["📡 STEP 3: Update admin notifications&lt;br/&gt;/users/{admin}/notifications/pending&lt;br/&gt;joinRequests: arrayUnion(id)"]
+
+    %% BRANCH REQUEST
+    CREATE_BRANCH_REQ["📡 STEP 1: Find closest admin"]
+    CREATE_BRANCH_REQ --> WRITE_BRANCH["📡 STEP 2: setDoc: /pendingApprovals/{id}&lt;br/&gt;requestType: 'branch'&lt;br/&gt;assignedAdminEmail: admin"]
+    WRITE_BRANCH --> NOTIFY_ADMIN_B["📡 STEP 3: Update admin notifications&lt;br/&gt;branchRequests: arrayUnion(id)"]
+    WRITE_BRANCH --> CREATE_PENDING_NODE["📡 STEP 4: Create pending node&lt;br/&gt;in user's hierarchy"]
+
+    %% STATUS UPDATE
+    NOTIFY_ADMIN_J --> UPDATE_STATUS
+    NOTIFY_ADMIN_B --> UPDATE_STATUS
+    CREATE_ORG_REQ --> UPDATE_STATUS
+    CREATE_PENDING_NODE --> UPDATE_STATUS
+
+    UPDATE_STATUS["📡 updateTreeStatus:&lt;br/&gt;All draft nodes → 'pending'"] --> REDIRECT["🔄 Redirect → dashboard.html"]
+
+    %% ADMIN SIDE
+    REDIRECT -.->|"Meanwhile..."| ADMIN_SEES["Admin sees notification&lt;br/&gt;in Admin Dashboard"]
+    ADMIN_SEES --> ADMIN_ACTION{"Admin Action"}
+    ADMIN_ACTION -->|"Approve"| APPROVE["📡 Add user to members[] in&lt;br/&gt;/hierarchies/{orgId}...&lt;br/&gt;Update user hierarchy status → 'active'"]
+    ADMIN_ACTION -->|"Reject"| REJECT["📡 Update status → 'rejected'&lt;br/&gt;Notify user"]
+
+    APPROVE --> ACTIVE["✅ User is now a MEMBER&lt;br/&gt;Node status: 'active'&lt;br/&gt;Visible in dashboard"]
+
+    style START fill:#E5F6FD,stroke:#29ABE2
+    style DONE fill:#D1FAE5,stroke:#10B981
+    style ACTIVE fill:#D1FAE5,stroke:#10B981
+    style BLOCKED fill:#FFF3CD,stroke:#F59E0B
+    style ERR1 fill:#FEE2E2,stroke:#EF4444
+    style ERR2 fill:#FEE2E2,stroke:#EF4444
+    style ERR3 fill:#FEE2E2,stroke:#EF4444
+    style REJECT fill:#FEE2E2,stroke:#EF4444
+</pre></div>
+
+<h3>Key Data Written During Join Flow</h3>
+<table>
+<thead><tr><th>Step</th><th>Firestore Path</th><th>Data</th></tr></thead>
+<tbody>
+<tr><td>1. Draft created</td><td><code>/users/{email}/hierarchies/{orgId}</code></td><td><code>{name, type, status: "draft", joinExisting: true}</code></td></tr>
+<tr><td>2. "Done" clicked</td><td><code>/pendingApprovals/{join-timestamp}</code></td><td><code>{requestType: "join", requesterEmail, targetNodePath, assignedAdminEmail, status: "pending"}</code></td></tr>
+<tr><td>3. Admin notified</td><td><code>/users/{admin}/notifications/pending</code></td><td><code>joinRequests: arrayUnion(approvalId)</code></td></tr>
+<tr><td>4. Status updated</td><td><code>/users/{email}/hierarchies/{orgId}</code></td><td><code>status: "pending"</code></td></tr>
+<tr><td>5. Admin approves</td><td><code>/hierarchies/{orgId}</code></td><td><code>members: arrayUnion(userEmail)</code></td></tr>
+<tr><td>6. User updated</td><td><code>/users/{email}/hierarchies/{orgId}</code></td><td><code>status: "active"</code></td></tr>
+</tbody>
+</table>
+<hr/>
+
+<h3>Staged Breakdown</h3>
+<p>The user joining process has two entry paths that converge into a shared submission flow. The diagrams below break this into digestible stages.</p>
+
+<h3>Stage 1 — Entry Point: Choose How to Join</h3>
+<div class="mermaid-wrapper">
+<pre class="mermaid">
+flowchart LR
+    START["🧑 User on\nwelcome.html"] --> CHOICE{"Choose\nAction"}
+    CHOICE -->|"Browse & Join"| PATH_A["🔍 Browse existing\norganizations"]
+    CHOICE -->|"Create New"| PATH_B["➕ Create new\norganization"]
+
+    style START fill:#1e3a5f,stroke:#29ABE2,color:#e4e4ed
+    style PATH_A fill:#0d2844,stroke:#3B82F6,color:#e4e4ed
+    style PATH_B fill:#0d3320,stroke:#10B981,color:#e4e4ed
+</pre></div>
+<h3>Stage 2a — Browse &amp; Join Path</h3>
+<div class="mermaid-wrapper">
+<pre class="mermaid">
+flowchart LR
+    BROWSE["🔍 Click Browse"] --> LOAD["📡 Load all active\norgs from /hierarchies"]
+    LOAD --> LIST["Render org cards\n+ search filter"]
+    LIST --> SELECT["User selects org"]
+    SELECT --> ADMIN{"Has\nadmin?"}
+    ADMIN -->|No| BLOCKED["⚠️ Disabled\n'No admin yet'"]
+    ADMIN -->|Yes| MEMBER{"Already\nmember?"}
+    MEMBER -->|Yes| BADGE["✅ Shows\n'Joined' badge"]
+    MEMBER -->|No| CHECK["📡 Check user's\nhierarchies"]
+    CHECK --> EXISTS{"Already\nexists?"}
+    EXISTS -->|"active/pending/draft"| ERR["❌ Error\nmessage"]
+    EXISTS -->|"Not found"| CONFIRM["✔️ Confirm\ndialog"]
+    CONFIRM --> DRAFT["📡 Create DRAFT\nin user hierarchy"]
+
+    style BLOCKED fill:#3d2e00,stroke:#F59E0B,color:#e4e4ed
+    style ERR fill:#3b1111,stroke:#EF4444,color:#e4e4ed
+    style DRAFT fill:#0d3320,stroke:#10B981,color:#e4e4ed
+</pre></div>
+<div class="callout"><strong>📡 Firestore write:</strong> <code>setDoc(/users/{email}/hierarchies/{orgId})</code> with <code>status: "draft"</code>, <code>joinExisting: true</code></div>
+<h3>Stage 2b — Create New Path</h3>
+<div class="mermaid-wrapper">
+<pre class="mermaid">
+flowchart LR
+    ADD["➕ Click Add Org"] --> MODAL["📝 Modal:\nName + Type"]
+    MODAL --> SAVE["📡 Save DRAFT\nin user hierarchy"]
+    SAVE --> TREE["📋 Draft node\nappears in tree"]
+    TREE --> CHILD{"Add\nsub-nodes?"}
+    CHILD -->|Yes| CHILD_MODAL["📝 Sub-node\nmodal"]
+    CHILD_MODAL -->|Save| TREE
+    CHILD -->|No| DONE["✅ Click\n'Done'"]
+
+    style DONE fill:#0d3320,stroke:#10B981,color:#e4e4ed
+</pre></div>
+<div class="callout"><strong>📡 Firestore write:</strong> <code>setDoc(/users/{email}/hierarchies/{orgId})</code> with <code>status: "draft"</code></div>
+<h3>Stage 3 — Submission: The "Done" Button</h3>
+<p>When the user clicks <strong>Done</strong>, all draft nodes are collected and submitted as approval requests:</p>
+<div class="mermaid-wrapper">
+<pre class="mermaid">
+flowchart LR
+    DONE["✅ Done\nclicked"] --> COLLECT["Collect all\ndraft trees"]
+    COLLECT --> TYPE{"Request\ntype?"}
+
+    TYPE -->|"Browse & Join"| JOIN_FLOW["📡 Create Join Request\n→ /pendingApprovals"]
+    TYPE -->|"New Org"| ORG_CHECK{"Org exists\nglobally?"}
+    ORG_CHECK -->|No| ORG_FLOW["📡 Create Org Request\n→ /pendingApprovals"]
+    ORG_CHECK -->|Yes| BRANCH_FLOW["📡 Create Branch Request\n→ /pendingApprovals"]
+
+    JOIN_FLOW --> NOTIFY["📡 Update admin\nnotifications"]
+    BRANCH_FLOW --> NOTIFY
+    ORG_FLOW --> UPDATE
+
+    NOTIFY --> UPDATE["📡 Set all drafts\n→ status: 'pending'"]
+    UPDATE --> REDIRECT["🔄 Redirect to\ndashboard.html"]
+
+    style DONE fill:#0d3320,stroke:#10B981,color:#e4e4ed
+    style REDIRECT fill:#1e3a5f,stroke:#29ABE2,color:#e4e4ed
+</pre></div>
+<h3>Stage 4 — Admin Review &amp; Resolution</h3>
+<div class="mermaid-wrapper">
+<pre class="mermaid">
+flowchart LR
+    NOTIF["🔔 Admin sees\nnotification"] --> REVIEW["📋 Review\nrequest"]
+    REVIEW --> ACTION{"Decision"}
+    ACTION -->|Approve| APPROVE["📡 Add to members[]\nSet status → 'active'"]
+    ACTION -->|Reject| REJECT["📡 Set status → 'rejected'\nNotify user"]
+    APPROVE --> ACTIVE["✅ User is now\na MEMBER"]
+
+    style APPROVE fill:#0d3320,stroke:#10B981,color:#e4e4ed
+    style REJECT fill:#3b1111,stroke:#EF4444,color:#e4e4ed
+    style ACTIVE fill:#0d3320,stroke:#10B981,color:#e4e4ed
+</pre></div>
+
+<h3>Data Written At Each Stage</h3>
+<table>
+<thead><tr><th>Stage</th><th>Firestore Path</th><th>Key Data</th></tr></thead>
+<tbody>
+<tr><td>Draft created</td><td><code>/users/{email}/hierarchies/{orgId}</code></td><td><code>status: "draft"</code>, <code>joinExisting: true</code></td></tr>
+<tr><td>"Done" clicked</td><td><code>/pendingApprovals/{join-timestamp}</code></td><td><code>requestType: "join"</code>, <code>assignedAdminEmail</code>, <code>status: "pending"</code></td></tr>
+<tr><td>Admin notified</td><td><code>/users/{admin}/notifications/pending</code></td><td><code>joinRequests: arrayUnion(approvalId)</code></td></tr>
+<tr><td>Status updated</td><td><code>/users/{email}/hierarchies/{orgId}</code></td><td><code>status: "pending"</code></td></tr>
+<tr><td>Admin approves</td><td><code>/hierarchies/{orgId}</code></td><td><code>members: arrayUnion(userEmail)</code></td></tr>
+<tr><td>User activated</td><td><code>/users/{email}/hierarchies/{orgId}</code></td><td><code>status: "active"</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ═══ 10 PROBLEMS ═══ -->
+<div class="section" id="problems">
+<h2><span class="num">10</span> Problem Governance Flow</h2>
+<div class="mermaid-wrapper zoomable"><div class="zoom-controls">
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),1.3)" title="Zoom In">+</button>
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),0.77)" title="Zoom Out">−</button>
+<button onclick="resetZoom(this.closest('.mermaid-wrapper'))" title="Reset">⟲</button>
+</div><span class="zoom-hint">Scroll to zoom · Drag to pan</span>
+<pre class="mermaid">
+flowchart LR
+    A["📝 User composes\nproblem"] --> B["📡 Save to\npendingProblemApprovals"]
+    B --> C["👤 Node Admin\nreviews"]
+    C --> D{"Decision"}
+    D -->|"✅ Approve"| E["Move to\n/problems"]
+    D -->|"❌ Reject"| F["Delete from\npending"]
+    D -->|"⬆️ Escalate"| G["Move to\n/escalatedProblems"]
+    D -->|"📦 Archive"| H["Move to\n/archivedProblems"]
+    E --> I["👥 Users vote\n↑ upvote  ↓ downvote"]
+    E --> K["💡 Users add\nsolutions"]
+
+    style E fill:#0d3320,stroke:#10B981,color:#e4e4ed
+    style F fill:#3b1111,stroke:#EF4444,color:#e4e4ed
+    style G fill:#3d2e00,stroke:#F59E0B,color:#e4e4ed
+    style H fill:#22222f,stroke:#6B7280,color:#e4e4ed
+</pre></div>
+</div>
+
+<!-- ═══ 11 DUAL STORAGE ═══ -->
+<div class="section" id="dual-storage">
+<h2><span class="num">11</span> Dual-Storage Architecture</h2>
+<p>A key architectural pattern is the <strong>dual storage</strong> of hierarchy data:</p>
+<div class="mermaid-wrapper zoomable"><div class="zoom-controls">
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),1.3)" title="Zoom In">+</button>
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),0.77)" title="Zoom Out">−</button>
+<button onclick="resetZoom(this.closest('.mermaid-wrapper'))" title="Reset">⟲</button>
+</div><span class="zoom-hint">Scroll to zoom · Drag to pan</span>
+<pre class="mermaid">
+flowchart LR
+    subgraph Per-User Copy
+        U["👤 /users/{email}/hierarchies/{orgId}"]
+        U1["Tracks: draft → pending → active"]
+    end
+
+    subgraph Global Source of Truth
+        G["🌐 /hierarchies/{orgId}"]
+        G1["Stores: members, admins, aliases"]
+    end
+
+    U <-->|"Sync on every\ncreate / edit / delete"| G
+
+    style U fill:#2d1f5e,stroke:#8B5CF6,color:#e4e4ed
+    style G fill:#0d2844,stroke:#3B82F6,color:#e4e4ed
+</pre></div>
+<div class="callout important">
+<strong>⚠️ Important:</strong> Every hierarchy change writes to <strong>both</strong> the user's personal collection and the global <code>/hierarchies</code> collection. The global copy is the source of truth for membership, while the user copy tracks personal status.
+</div>
+</div>
+
+<!-- ═══ 12 SMART CONVERT ═══ -->
+<div class="section" id="smart-convert">
+<h2><span class="num">12</span> Smart Branch-to-Join Conversion</h2>
+<p>When a user tries to create a sub-node that already exists globally, the system automatically converts the request:</p>
+<div class="mermaid-wrapper zoomable"><div class="zoom-controls">
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),1.3)" title="Zoom In">+</button>
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),0.77)" title="Zoom Out">−</button>
+<button onclick="resetZoom(this.closest('.mermaid-wrapper'))" title="Reset">⟲</button>
+</div><span class="zoom-hint">Scroll to zoom · Drag to pan</span>
+<pre class="mermaid">
+flowchart LR
+    A["User: 'Add CSE Dept'"] --> B["📡 Check if exists\nin global hierarchy"]
+    B --> C{"Exists?"}
+    C -->|"Yes + Not member"| D["🔄 Auto-convert\nto Join Request"]
+    C -->|"Yes + Is member"| E["❌ Already\na member"]
+    C -->|"No"| F["📡 Create\nBranch Request"]
+
+    style D fill:#0d2844,stroke:#3B82F6,color:#e4e4ed
+    style E fill:#3b1111,stroke:#EF4444,color:#e4e4ed
+    style F fill:#0d3320,stroke:#10B981,color:#e4e4ed
+</pre></div>
+</div>
+
+<!-- ═══ 13 ORG MERGE ═══ -->
+<div class="section" id="org-merge">
+<h2><span class="num">13</span> Org Merge Feature (Super Admin)</h2>
+<div class="mermaid-wrapper zoomable"><div class="zoom-controls">
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),1.3)" title="Zoom In">+</button>
+<button onclick="zoomDiagram(this.closest('.mermaid-wrapper'),0.77)" title="Zoom Out">−</button>
+<button onclick="resetZoom(this.closest('.mermaid-wrapper'))" title="Reset">⟲</button>
+</div><span class="zoom-hint">Scroll to zoom · Drag to pan</span>
+<pre class="mermaid">
+flowchart LR
+    A["User creates\n'IIIT Bhapal' ✏️"] --> B["🛡️ Super Admin\nsees request"]
+    B --> C["Click 'Merge'"]
+    C --> D["Select target:\n'IIIT Bhopal'"]
+    D --> E{"Retain\nalias?"}
+    E -->|"Retain"| F["Add to\nnameAliases[]"]
+    E -->|"Vanish"| G["Discard\nname"]
+    F --> H["Delete wrong hierarchy\nCreate join request"]
+    G --> H
+
+    style F fill:#0d3320,stroke:#10B981,color:#e4e4ed
+    style H fill:#0d2844,stroke:#3B82F6,color:#e4e4ed
+</pre></div>
+</div>
+
+<!-- ═══ 14 SECURITY ═══ -->
+<div class="section" id="security">
+<h2><span class="num">14</span> Security Architecture</h2>
+<p>Access control is enforced at the Firestore level via security rules:</p>
+<table>
+<thead><tr><th>Collection</th><th>Read</th><th>Write</th><th>Delete</th></tr></thead>
+<tbody>
+<tr><td><code>/users/{email}</code></td><td>Owner only</td><td>Owner only</td><td>Owner only</td></tr>
+<tr><td><code>/hierarchies/{orgId}</code></td><td>Any signed-in</td><td>Members / Admins</td><td>Org Admin / Super</td></tr>
+<tr><td><code>/pendingApprovals/{id}</code></td><td>Super / Assigned / Requester</td><td>Signed-in (create)</td><td>Super / Assigned</td></tr>
+<tr><td><code>/problems/{id}</code></td><td>Signed-in</td><td>Owner / Admin / Super</td><td>Owner / Super</td></tr>
+<tr><td><code>/superAdmin/**</code></td><td>Super Admin only</td><td>Super Admin only</td><td>Super Admin only</td></tr>
+</tbody>
+</table>
+<h3>Key Security Functions in <code>firestore.rules</code></h3>
+<table>
+<thead><tr><th>Function</th><th>Check</th></tr></thead>
+<tbody>
+<tr><td><code>isSuperAdmin()</code></td><td><code>email == 'admin@flowlink.edu'</code></td></tr>
+<tr><td><code>isOrgAdmin()</code></td><td><code>email in resource.data.adminEmails</code></td></tr>
+<tr><td><code>isMember()</code></td><td><code>email in resource.data.members</code></td></tr>
+<tr><td><code>isOwnerByEmail(email)</code></td><td><code>auth.token.email == email</code></td></tr>
+</tbody>
+</table>
+</div>
+
+</div><!-- /container -->
+
+</div>
+
+<script>
+mermaid.initialize({
+    startOnLoad:true,theme:'dark',
+    themeVariables:{
+        darkMode:true,background:'#12121c',primaryColor:'#1e3a5f',primaryTextColor:'#e4e4ed',
+        primaryBorderColor:'#29ABE2',lineColor:'#4a4a5e',secondaryColor:'#2d1f5e',tertiaryColor:'#1a1a28',
+        fontFamily:'Inter,sans-serif',fontSize:'13px',nodeBorder:'#29ABE2',mainBkg:'#1e3a5f',
+        clusterBkg:'#1a1a28',clusterBorder:'#2e2e3e',edgeLabelBackground:'#12121c'
+    },
+    flowchart:{curve:'basis',padding:20,htmlLabels:true,useMaxWidth:false},
+    sequence:{useMaxWidth:true,actorFontFamily:'Inter,sans-serif',noteFontFamily:'Inter,sans-serif',messageFontFamily:'Inter,sans-serif'},
+    er:{useMaxWidth:false,fontSize:12}
+});
+
+// Zoom/Pan for diagrams
+function zoomDiagram(wrapper, factor) {
+    const svg = wrapper.querySelector('svg');
+    if (!svg) return;
+    let vb = svg.getAttribute('viewBox');
+    if (!vb) {
+        const w = svg.getBBox().width || svg.clientWidth;
+        const h = svg.getBBox().height || svg.clientHeight;
+        vb = `0 0 ${w} ${h}`;
+        svg.dataset.origVb = vb;
+    }
+    if (!svg.dataset.origVb) svg.dataset.origVb = vb;
+    const [x, y, w, h] = vb.split(' ').map(Number);
+    const nw = w / factor, nh = h / factor;
+    const nx = x + (w - nw) / 2, ny = y + (h - nh) / 2;
+    svg.setAttribute('viewBox', `${nx} ${ny} ${nw} ${nh}`);
+    svg.style.width = '100%';
+    svg.style.height = 'auto';
+    svg.style.minHeight = '400px';
+}
+function resetZoom(wrapper) {
+    const svg = wrapper.querySelector('svg');
+    if (!svg || !svg.dataset.origVb) return;
+    svg.setAttribute('viewBox', svg.dataset.origVb);
+}
+
+// Scroll wheel zoom on zoomable wrappers
+document.addEventListener('wheel', function(e) {
+    const wrapper = e.target.closest('.zoomable');
+    if (!wrapper) return;
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.15 : 0.87;
+    zoomDiagram(wrapper, factor);
+}, {passive:false});
+
+// Drag to pan
+let dragState = null;
+document.addEventListener('mousedown', function(e) {
+    const wrapper = e.target.closest('.zoomable');
+    if (!wrapper || e.target.closest('.zoom-controls')) return;
+    const svg = wrapper.querySelector('svg');
+    if (!svg) return;
+    dragState = {svg, startX: e.clientX, startY: e.clientY, vb: svg.getAttribute('viewBox')};
+    e.preventDefault();
+});
+document.addEventListener('mousemove', function(e) {
+    if (!dragState) return;
+    const {svg, startX, startY, vb} = dragState;
+    const [x, y, w, h] = vb.split(' ').map(Number);
+    const svgRect = svg.getBoundingClientRect();
+    const scaleX = w / svgRect.width, scaleY = h / svgRect.height;
+    const dx = (startX - e.clientX) * scaleX, dy = (startY - e.clientY) * scaleY;
+    svg.setAttribute('viewBox', `${x+dx} ${y+dy} ${w} ${h}`);
+});
+document.addEventListener('mouseup', function() { dragState = null; });
+
+// Back to top
+const btn = document.querySelector('.back-top');
+window.addEventListener('scroll', () => btn.classList.toggle('visible', window.scrollY > 400));
+
+// Active TOC highlight
+const tocLinks = document.querySelectorAll('.toc a');
+const sections = document.querySelectorAll('.section[id]');
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            tocLinks.forEach(l => l.classList.remove('active'));
+            const link = document.querySelector(`.toc a[href="#${e.target.id}"]`);
+            if (link) link.classList.add('active');
+        }
+    });
+}, {rootMargin:'-20% 0px -70% 0px'});
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

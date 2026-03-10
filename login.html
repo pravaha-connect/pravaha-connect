@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - प्रवाह Connect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366F1;
+            --primary-dark: #4F46E5;
+            --secondary: #22D3EE;
+            --accent: #F472B6;
+            --dark: #0F172A;
+            --gray: #64748B;
+            --light: #F8FAFC;
+            --white: #FFFFFF;
+            --success: #10B981;
+            --error: #EF4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            background: linear-gradient(135deg, #EEF2FF 0%, #F8FAFC 50%, #ECFEFF 100%);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+        }
+
+        .shape-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--primary);
+            top: -100px;
+            right: -100px;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .shape-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--secondary);
+            bottom: -50px;
+            left: -50px;
+            animation: float 15s ease-in-out infinite reverse;
+        }
+
+        .shape-3 {
+            width: 200px;
+            height: 200px;
+            background: var(--accent);
+            top: 50%;
+            left: 10%;
+            animation: float 18s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-30px) rotate(10deg);
+            }
+        }
+
+        /* Left Panel - Branding */
+        .brand-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-content {
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.75rem;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-text .devanagari {
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .logo-text .english {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+
+        .brand-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .brand-title span {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-desc {
+            font-size: 1.1rem;
+            color: var(--gray);
+            margin-bottom: 2.5rem;
+            line-height: 1.7;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- Left Panel - Branding -->
+    <div class="brand-panel">
+        <div class="brand-content">
+            <a href="index.html" class="brand-logo">
+                <div class="logo-icon"><i class="fas fa-project-diagram"></i></div>
+                <span class="logo-text">
+                    <span class="devanagari">प्रवाह</span>
+                    <span class="english">Connect</span>
+                </span>
+            </a>
+            <h1 class="brand-title">Solve Problems Through <span>Structured Hierarchies</span></h1>
+            <p class="brand-desc">Transform organizational challenges into manageable workflows with intelligent
+                escalation, community voting, and verified communication.</p>
+
+            <div class="features-mini">
+                <div class="feature-mini">
+                    <div class="feature-mini-icon"><i class="fas fa-sitemap"></i></div>
+                    <div class="feature-mini-text">
+                        <h4>Hierarchical Structure</h4>
+                        <p>Multi-level organization management</p>
+                    </div>
+                </div>
+                <div class="feature-mini">
+                    <div class="feature-mini-icon"><i class="fas fa-vote-yea"></i></div>
+                    <div class="feature-mini-text">
+                        <h4>Community Voting</h4>
+                        <p>Prioritize through collective input</p>
+                    </div>
+                </div>
+                <div class="feature-mini">
+                    <div class="feature-mini-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="feature-mini-text">
+                        <h4>Solution Tracking</h4>
+                        <p>Accept and implement best solutions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel - Login Form -->
+    <div class="login-panel">
+        <div class="login-card">
+            <div class="login-header">
+                <h2 class="login-title">Welcome Back</h2>
+                <p class="login-subtitle">Sign in to your प्रवाह Connect account</p>
+            </div>
+
+            <form class="login-form" id="loginForm">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" id="email" class="form-input" placeholder="Enter your email" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="password" class="form-input" placeholder="Enter your password"
+                            required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary login-btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Sign In</span>
+                </button>
+
+                <div class="divider">
+                    <span>or continue with</span>
+                </div>
+
+                <button type="button" class="btn btn-google" id="googleSignIn">
+                    <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
+                        <path fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                        <path fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                    </svg>
+                    <span>Continue with Google</span>
+                </button>
+
+                <div class="login-footer">
+                    <p>First time here? <a href="#" class="signup-link" id="signupLink">Create your account</a></p>
+                </div>
+
+                <!-- Reference Credentials Button -->
+                <button type="button" class="btn btn-reference" id="referenceBtn">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Reference Credentials</span>
+                </button>
+
+                <!-- Credentials Modal -->
+                <div class="credentials-modal" id="credentialsModal">
+                    <div class="credentials-content">
+                        <div class="credentials-header">
+                            <h3>Reference Credentials</h3>
+                            <button class="close-btn" id="closeModal">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="credentials-list">
+                            <div class="credential-item">
+                                <div class="credential-role">
+                                    <i class="fas fa-crown"></i>
+                                    <span>Super Admin</span>
+                                </div>
+                                <div class="credential-details">
+                                    <div class="credential-field">
+                                        <label>Email:</label>
+                                        <span class="credential-value"
+                                            data-copy="admin@pravahconnect.edu">admin@pravahconnect.edu</span>
+                                        <button class="copy-btn" onclick="copyToClipboard('admin@pravahconnect.edu')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="credential-field">
+                                        <label>Password:</label>
+                                        <span class="credential-value" data-copy="drona@admin">drona@admin</span>
+                                        <button class="copy-btn" onclick="copyToClipboard('drona@admin')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="credential-item">
+                                <div class="credential-role">
+                                    <i class="fas fa-user-shield"></i>
+                                    <span>Admin of XYZ Institute</span>
+                                </div>
+                                <div class="credential-details">
+                                    <div class="credential-field">
+                                        <label>Email:</label>
+                                        <span class="credential-value"
+                                            data-copy="admin.demo@pravahconnect.edu">admin.demo@pravahconnect.edu</span>
+                                        <button class="copy-btn"
+                                            onclick="copyToClipboard('admin.demo@pravahconnect.edu')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="credential-field">
+                                        <label>Password:</label>
+                                        <span class="credential-value" data-copy="admin123">admin123</span>
+                                        <button class="copy-btn" onclick="copyToClipboard('admin123')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="credential-item">
+                                <div class="credential-role">
+                                    <i class="fas fa-user"></i>
+                                    <span>Normal User</span>
+                                </div>
+                                <div class="credential-details">
+                                    <div class="credential-field">
+                                        <label>Email:</label>
+                                        <span class="credential-value"
+                                            data-copy="user.demo@pravahconnect.edu">user.demo@pravahconnect.edu</span>
+                                        <button class="copy-btn"
+                                            onclick="copyToClipboard('user.demo@pravahconnect.edu')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="credential-field">
+                                        <label>Password:</label>
+                                        <span class="credential-value" data-copy="user123">user123</span>
+                                        <button class="copy-btn" onclick="copyToClipboard('user123')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="credentials-note">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>These are demo credentials for testing purposes only.</p>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <a href="index.html" class="back-home">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Home</span>
+            </a>
+        </div>
+    </div>
+
+    <style>
+        /* Features Mini */
+        .features-mini {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .feature-mini {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature-mini:hover {
+            transform: translateX(10px);
+            background: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .feature-mini-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .feature-mini-text h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .feature-mini-text p {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        /* Login Panel */
+        .login-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 440px;
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+
+        /* Form Styles */
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            background: var(--light);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-input:focus+.input-icon,
+        .input-wrapper:focus-within .input-icon {
+            color: var(--primary);
+        }
+
+        .form-input::placeholder {
+            color: #94A3B8;
+        }
+
+        /* Buttons */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-google {
+            background: white;
+            color: var(--dark);
+            border: 2px solid #E2E8F0;
+        }
+
+        .btn-google:hover {
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .google-icon {
+            flex-shrink: 0;
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #E2E8F0;
+        }
+
+        .divider span {
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+
+        /* Footer */
+        .login-footer {
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        .login-footer p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .signup-link {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .signup-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        /* Back Home Link */
+        .back-home {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #E2E8F0;
+            color: var(--gray);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-home:hover {
+            color: var(--primary);
+        }
+
+        /* Reference Credentials Button */
+        .btn-reference {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border: 2px solid rgba(99, 102, 241, 0.2);
+            margin-top: 0.5rem;
+        }
+
+        .btn-reference:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: var(--primary);
+        }
+
+        /* Credentials Modal */
+        .credentials-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .credentials-modal.show {
+            display: flex;
+        }
+
+        .credentials-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease;
+        }
+
+        .credentials-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .credentials-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--gray);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        .credentials-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .credential-item {
+            background: var(--light);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .credential-role {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .credential-role i {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .credential-role span {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .credential-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .credential-field {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .credential-field label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--gray);
+            min-width: 70px;
+        }
+
+        .credential-value {
+            flex: 1;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            background: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+            color: var(--dark);
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .credentials-note {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(245, 158, 11, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .credentials-note i {
+            color: #D97706;
+            font-size: 1.1rem;
+        }
+
+        .credentials-note p {
+            color: #92400E;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Messages */
+        .login-message {
+            margin-top: 1rem;
+            padding: 0.875rem 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            text-align: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        .login-message-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .login-message-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #DC2626;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading State */
+        .btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .btn.loading::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            body {
+                flex-direction: column;
+            }
+
+            .brand-panel {
+                padding: 2rem;
+            }
+
+            .brand-content {
+                max-width: 100%;
+            }
+
+            .brand-title {
+                font-size: 2rem;
+            }
+
+            .features-mini {
+                display: none;
+            }
+
+            .login-panel {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 1.5rem;
+                border-radius: 20px;
+            }
+
+            .brand-panel {
+                padding: 1.5rem 1rem;
+            }
+
+            .brand-title {
+                font-size: 1.5rem;
+            }
+
+            .brand-desc {
+                font-size: 0.95rem;
+            }
+
+            .logo-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+
+            .logo-text {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        console.log('Starting Firebase initialization...');
+
+        try {
+            const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
+            const { getAnalytics } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js');
+            const {
+                getAuth,
+                signInWithEmailAndPassword,
+                signInWithPopup,
+                GoogleAuthProvider,
+                createUserWithEmailAndPassword,
+                onAuthStateChanged
+            } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+            const {
+                getFirestore,
+                doc,
+                setDoc,
+                getDoc,
+                collection,
+                getDocs,
+                serverTimestamp
+            } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+
+            console.log('Firebase modules imported successfully');
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyBsuZL4U2H66C9tUKN91KXMm-l5umOa1vY",
+                authDomain: "flowlinkkiro.firebaseapp.com",
+                projectId: "flowlinkkiro",
+                storageBucket: "flowlinkkiro.firebasestorage.app",
+                messagingSenderId: "918596906932",
+                appId: "1:918596906932:web:55e2a235cefedd61098ce1",
+                measurementId: "G-B32FNF648G"
+            };
+
+            const app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            const googleProvider = new GoogleAuthProvider();
+
+            console.log('Firebase initialized successfully');
+
+            googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+            const SUPER_ADMIN_EMAIL = 'admin@flowlink.edu';
+            const SUPER_ADMIN_PASSWORD = 'drona@admin';
+
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    console.log('User is signed in:', user.email);
+                    if (user.email === SUPER_ADMIN_EMAIL) {
+                        console.log('Super Admin detected, skipping auto-redirect');
+                        return;
+                    }
+                    const hasHierarchies = await checkUserHierarchies(user);
+                    await ensureUserDocument(user, !hasHierarchies);
+                    if (hasHierarchies) {
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        window.location.href = 'welcome.html';
+                    }
+                } else {
+                    console.log('User is signed out');
+                }
+            });
+
+            async function checkUserHierarchies(user) {
+                try {
+                    const hierarchiesColRef = collection(db, 'users', user.email, 'hierarchies');
+                    const querySnapshot = await getDocs(hierarchiesColRef);
+                    return !querySnapshot.empty;
+                } catch (error) {
+                    console.error('Error checking hierarchies:', error);
+                    return false;
+                }
+            }
+
+            async function ensureUserDocument(user, isFirstTime) {
+                try {
+                    const userRef = doc(db, 'users', user.email);
+                    const userData = {
+                        userId: user.uid,
+                        email: user.email,
+                        displayName: user.displayName || user.email.split('@')[0],
+                        photoURL: user.photoURL || null,
+                        role: 'student',
+                        isActive: true,
+                        lastLoginAt: serverTimestamp(),
+                        updatedAt: serverTimestamp()
+                    };
+
+                    const userDoc = await getDoc(userRef);
+
+                    if (!userDoc.exists()) {
+                        userData.createdAt = serverTimestamp();
+                        userData.stats = { problemsCreated: 0, problemsSolved: 0, announcementsRead: 0, loginCount: 1 };
+                        userData.preferences = { theme: 'light', notifications: true, language: 'en' };
+                        await setDoc(userRef, userData);
+                        console.log('New user document created with email ID:', user.email);
+                    } else {
+                        const existingData = userDoc.data();
+                        userData.stats = { ...existingData.stats, loginCount: (existingData.stats?.loginCount || 0) + 1 };
+                        userData.preferences = existingData.preferences || userData.preferences;
+                        await setDoc(userRef, userData, { merge: true });
+                        console.log('User document updated for email:', user.email);
+                    }
+                } catch (error) {
+                    console.error('Error managing user document:', error);
+                }
+            }
+
+            const loginForm = document.getElementById('loginForm');
+            const googleSignInBtn = document.getElementById('googleSignIn');
+            const signupLink = document.getElementById('signupLink');
+
+            const inputs = document.querySelectorAll('.form-input');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function () { this.parentElement.classList.add('focused'); });
+                input.addEventListener('blur', function () { this.parentElement.classList.remove('focused'); });
+            });
+
+            loginForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                const isSignupMode = this.classList.contains('signup-mode');
+                const submitBtn = this.querySelector('.login-btn');
+                submitBtn.classList.add('loading');
+
+                if (!isSignupMode && email === SUPER_ADMIN_EMAIL && password === SUPER_ADMIN_PASSWORD) {
+                    try {
+                        await signInWithEmailAndPassword(auth, email, password);
+                        sessionStorage.setItem('superAdminAuth', 'true');
+                        showMessage('Super Admin access granted!', 'success');
+                        window.location.href = 'super-admin.html';
+                        return;
+                    } catch (error) {
+                        console.error('Super Admin auth error:', error);
+                        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                            showMessage('Super Admin user not found in Firebase. Please create user admin@flowlink.edu in Firebase Auth Console.', 'error');
+                        } else {
+                            showMessage('Super Admin authentication failed: ' + error.message, 'error');
+                        }
+                        submitBtn.classList.remove('loading');
+                        return;
+                    }
+                }
+
+                try {
+                    if (isSignupMode) {
+                        await createUserWithEmailAndPassword(auth, email, password);
+                        showMessage('Account created successfully!', 'success');
+                    } else {
+                        await signInWithEmailAndPassword(auth, email, password);
+                        showMessage('Login successful!', 'success');
+                    }
+                } catch (error) {
+                    console.error('Authentication error:', error);
+                    showMessage(getErrorMessage(error.code), 'error');
+                } finally {
+                    submitBtn.classList.remove('loading');
+                }
+            });
+
+            googleSignInBtn.addEventListener('click', async function (e) {
+                e.preventDefault();
+                this.classList.add('loading');
+                this.disabled = true;
+                try {
+                    await signInWithPopup(auth, googleProvider);
+                    showMessage('Google sign-in successful!', 'success');
+                } catch (error) {
+                    console.error('Google sign-in error:', error);
+                    showMessage(getErrorMessage(error.code), 'error');
+                } finally {
+                    this.classList.remove('loading');
+                    this.disabled = false;
+                }
+            });
+
+            signupLink.addEventListener('click', function (e) {
+                e.preventDefault();
+                toggleSignupMode();
+            });
+
+            function toggleSignupMode() {
+                const form = document.getElementById('loginForm');
+                const title = document.querySelector('.login-title');
+                const subtitle = document.querySelector('.login-subtitle');
+                const submitBtn = document.querySelector('.login-btn span');
+                const submitIcon = document.querySelector('.login-btn i');
+                const link = document.getElementById('signupLink');
+                const isSignupMode = form.classList.contains('signup-mode');
+
+                if (isSignupMode) {
+                    form.classList.remove('signup-mode');
+                    title.textContent = 'Welcome Back';
+                    subtitle.textContent = 'Sign in to your FlowLink account';
+                    submitBtn.textContent = 'Sign In';
+                    submitIcon.className = 'fas fa-sign-in-alt';
+                    link.textContent = 'Create your account';
+                } else {
+                    form.classList.add('signup-mode');
+                    title.textContent = 'Create Account';
+                    subtitle.textContent = 'Join प्रवाह Connect and start organizing';
+                    submitBtn.textContent = 'Create Account';
+                    submitIcon.className = 'fas fa-user-plus';
+                    link.textContent = 'Already have an account?';
+                }
+            }
+
+            function showMessage(message, type = 'info') {
+                const existingMessage = document.querySelector('.login-message');
+                if (existingMessage) existingMessage.remove();
+
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `login-message login-message-${type}`;
+                messageDiv.textContent = message;
+
+                const loginCard = document.querySelector('.login-card');
+                const loginForm = document.getElementById('loginForm');
+                loginForm.appendChild(messageDiv);
+
+                if (type !== 'success') {
+                    setTimeout(() => {
+                        messageDiv.style.opacity = '0';
+                        setTimeout(() => messageDiv.remove(), 300);
+                    }, 4000);
+                }
+            }
+
+            function getErrorMessage(errorCode) {
+                const errorMessages = {
+                    'auth/user-not-found': 'No account found with this email address.',
+                    'auth/wrong-password': 'Incorrect password. Please try again.',
+                    'auth/email-already-in-use': 'An account with this email already exists.',
+                    'auth/weak-password': 'Password should be at least 6 characters long.',
+                    'auth/invalid-email': 'Please enter a valid email address.',
+                    'auth/user-disabled': 'This account has been disabled.',
+                    'auth/too-many-requests': 'Too many failed attempts. Please try again later.',
+                    'auth/network-request-failed': 'Network error. Please check your connection.',
+                    'auth/popup-closed-by-user': 'Sign-in popup was closed before completion.',
+                    'auth/cancelled-popup-request': 'Sign-in was cancelled.',
+                    'auth/popup-blocked': 'Sign-in popup was blocked by the browser.',
+                    'auth/invalid-credential': 'Invalid email or password. Please try again.'
+                };
+                return errorMessages[errorCode] || 'An unexpected error occurred. Please try again.';
+            }
+
+            console.log('Login page initialized successfully');
+
+            // Reference Credentials Modal functionality
+            const referenceBtn = document.getElementById('referenceBtn');
+            const credentialsModal = document.getElementById('credentialsModal');
+            const closeModal = document.getElementById('closeModal');
+
+            referenceBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                credentialsModal.classList.add('show');
+            });
+
+            closeModal.addEventListener('click', function () {
+                credentialsModal.classList.remove('show');
+            });
+
+            credentialsModal.addEventListener('click', function (e) {
+                if (e.target === credentialsModal) {
+                    credentialsModal.classList.remove('show');
+                }
+            });
+
+            // Copy to clipboard functionality
+            window.copyToClipboard = function (text) {
+                navigator.clipboard.writeText(text).then(function () {
+                    showMessage('Copied to clipboard!', 'success');
+                }).catch(function (err) {
+                    console.error('Could not copy text: ', err);
+                    showMessage('Failed to copy to clipboard', 'error');
+                });
+            };
+
+        } catch (error) {
+            console.error('Error initializing Firebase:', error);
+            document.body.innerHTML = `
+                <div style="padding: 2rem; text-align: center; font-family: Inter, sans-serif; max-width: 400px; margin: 100px auto;">
+                    <h2 style="color: #0F172A; margin-bottom: 1rem;">Loading Error</h2>
+                    <p style="color: #64748B;">There was an error loading the login page. Please refresh and try again.</p>
+                    <p style="color: #94A3B8; font-size: 0.85rem; margin-top: 1rem;">Error: ${error.message}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+</html>
