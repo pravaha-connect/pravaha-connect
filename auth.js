@@ -34,7 +34,7 @@ class AuthService {
         } else {
             console.log('User signed out');
             // Redirect to login if on protected pages
-            if (!window.location.pathname.includes('login.html') && 
+            if (!window.location.pathname.includes('login.html') &&
                 !window.location.pathname.includes('index.html')) {
                 window.location.href = 'login.html';
             }
@@ -69,6 +69,9 @@ class AuthService {
                 message: 'Google sign-in successful!'
             };
         } catch (error) {
+            console.error('Google sign-in error details:', error);
+            console.error('Error code:', error.code);
+            console.error('Error message:', error.message);
             return {
                 success: false,
                 error: error.code,
@@ -135,10 +138,18 @@ class AuthService {
             'auth/network-request-failed': 'Network error. Please check your connection.',
             'auth/popup-closed-by-user': 'Sign-in popup was closed before completion.',
             'auth/cancelled-popup-request': 'Sign-in was cancelled.',
-            'auth/popup-blocked': 'Sign-in popup was blocked by the browser.'
+            'auth/popup-blocked': 'Sign-in popup was blocked by the browser.',
+            'auth/unauthorized-domain': 'This domain is not authorized for OAuth operations. Please add it to the Firebase console.',
+            'auth/operation-not-allowed': 'Google sign-in is not enabled. Please enable it in the Firebase console.',
+            'auth/invalid-api-key': 'Invalid API key. Please check your Firebase configuration.',
+            'auth/app-not-authorized': 'This app is not authorized to use Firebase Authentication.',
+            'auth/invalid-user-token': 'The user\'s credential is no longer valid. Please sign in again.',
+            'auth/user-token-expired': 'The user\'s credential has expired. Please sign in again.',
+            'auth/null-user': 'The user is null. Please try signing in again.',
+            'auth/invalid-credential': 'The authentication credential is malformed or has expired.'
         };
 
-        return errorMessages[errorCode] || 'An unexpected error occurred. Please try again.';
+        return errorMessages[errorCode] || `Authentication error (${errorCode}). Please try again or contact support.`;
     }
 
     // Validate email format
